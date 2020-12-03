@@ -1,0 +1,23 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+canvas {
+    display: block;
+}
+
+#video{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+}
+
+#video canvas{
+    border-radius: 15px;
+}
+/* #video canvas{
+    border-radius: 15px;
+} */

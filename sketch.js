@@ -20,10 +20,20 @@ let mask_off_nose = "Make sure your mask is over your nose and mouth and secure 
 
 let covidData;
 let covidGlobal;
+
+let fipsInput;
+let zipInput;
+let mask;
+let covert;
+
+L.mapquest.key = 'KPWhVIiFhObASlw1rwU6ZGQns9bxa3sB';
+var geocoder = L.mapquest.geocoding();
 // Load the model first
 function preload() {
     classifier = ml5.imageClassifier(imageModelURL + 'model.json');
     loadJSON("https://api.covid19api.com/summary", gotData, 'json');
+    mask = loadJSON('mask-usage.json', 'json');
+    convert = loadJSON('zipConvert.json', 'json');
 }
 
 function gotData(data){
@@ -50,7 +60,7 @@ function setup() {
     document.getElementById("label").innerHTML = mask_result;
     document.getElementById("covidGlobal").innerHTML = formatNumber(covidData.Global.TotalConfirmed);
     let c = covidData.Countries;
-    for(var i = 0; i < c.length; i++){
+    for(var i = 0; i < 0; i++){
         let k = createElement('h1', c[i].Country);
         k.parent('covidCountries');
         k.addClass('text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl md:text-4xl text-left');
@@ -58,6 +68,7 @@ function setup() {
         h.parent('covidCountries');
         h.addClass('text-3xl tracking-tight font-extrabold text-red-600 sm:text-4xl md:text-4xl text-right');
     }
+    zipLookUp();
 }
 
 function draw() {
@@ -77,6 +88,7 @@ function draw() {
     }
 
     document.getElementById("label").innerHTML = mask_result;
+     
 }
 
 // Get a prediction for the current video frame
@@ -96,7 +108,7 @@ function gotResult(error, results) {
     // The results are in an array ordered by confidence.
     // console.log(results[0]);
     label = results[0].label;
-    // Classifiy again!
+    // Classifiy again
     classifyVideo();
 }
 
@@ -112,4 +124,57 @@ function pauseCapture(){
         document.getElementById("pause_button").innerHTML = playing;
     }
 
+}
+
+//Gets Zip Code input and converts it to FIPS code for data lookup
+function getZipCode(){
+    zipInput = document.getElementById("zip").value;
+    for(var i = 0; i < convert.codes.length; i++){
+        if(zipInput == convert.codes[i].zip){
+            fipsInput = convert.codes[i].stCountyFp;
+            document.getElementById("place").innerHTML = convert.codes[i].countyName + ", " + convert.codes[i].state;
+        }
+    }
+    getMaskData();
+}
+
+//Uses FIPS code to retrieve mask wearing data
+function getMaskData(){
+    if(mask){
+        for(var i = 0; i < mask.maskData.length; i++){
+            if(fipsInput == mask.maskData[i].countyfp){
+                document.getElementById("always-text").innerHTML = Math.round(mask.maskData[i].always * 100)+"%";
+                document.getElementById("always-bar").style.width = Math.round(mask.maskData[i].always * 100)+"%";
+                document.getElementById("frequently-text").innerHTML = Math.round(mask.maskData[i].frequently * 100)+"%";
+                document.getElementById("frequently-bar").style.width = Math.round(mask.maskData[i].frequently * 100)+"%";
+                document.getElementById("sometimes-text").innerHTML = Math.round(mask.maskData[i].sometimes * 100)+"%";
+                document.getElementById("sometimes-bar").style.width = Math.round(mask.maskData[i].sometimes * 100)+"%";
+                document.getElementById("rarely-text").innerHTML = Math.round(mask.maskData[i].sometimes * 100)+"%";
+                document.getElementById("rarely-bar").style.width = Math.round(mask.maskData[i].sometimes * 100)+"%";
+                document.getElementById("never-text").innerHTML = Math.round(mask.maskData[i].sometimes * 100)+"%";
+                document.getElementById("never-bar").style.width = Math.round(mask.maskData[i].sometimes * 100)+"%";
+            }
+        }
+    }
+
+}
+
+//Gets users current location
+function zipLookUp(){
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(setCoord);
+    }else{
+        alert("Location service is not supported. Please enter your zip code to see data");
+    }
+}
+//sends users current location to MapQuest GeoEncoder to turn into zip code
+function setCoord(position){
+    geocoder.reverse([position.coords.latitude,position.coords.longitude], geocodingCallback);
+}
+
+//Returns MapQuest results and triggers the page to update with user's location
+function geocodingCallback(error, result) {
+  console.log(result);
+    document.getElementById("zip").value = result.results[0].locations[0].postalCode;
+    getZipCode();
 }

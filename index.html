@@ -6,6 +6,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/addons/p5.sound.min.js"></script>
     <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
     <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <script src="https://api.mqcdn.com/sdk/mapquest-js/v1.3.2/mapquest.js"></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="style.css">
@@ -36,7 +37,6 @@
             <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
               <div class="sm:text-center lg:text-left">
                 <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                  <!-- <span class="block xl:inline">Data to enrich your</span><br> -->
                   <span class="block text-red-600 xl:inline" id="label"></span>
                 </h1>
                 <p class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0" id="mask_info">
@@ -57,14 +57,121 @@
             </div>
         </div>
       </div>
+      <div class="bg-black py-12">
+        <div class="mb-12">
+          <h1 class="text-white text-center text-4xl font-bold">How often do people wear a mask in public in <span id="place"></span></h1>
+        </div>
+        <div class="flex flex-row justify-center flex-wrap mb-12">
+          <h3 class="text-white text-right text-xl font-bold my-auto mr-7 col-span-3">Enter your Zip Code</h3>
+          <input class="rounded-full p-1.5 mx-3.5 text-center max-w-xs focus:outline-none focus:ring focus:border-gray-100" id="zip" name="zip" type="text" pattern="[0-9]*">
+          <button class="bg-yellow-400 rounded-full w-12 font-bold" onclick="getZipCode()">Go!</button>
+        </div>
+        <div>
+          <div class="max-w-lg mx-auto">
+            <div class="relative pt-1">
+              <div class="flex mb-2 items-center justify-between">
+                <div>
+                  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-700 bg-green-200">
+                    Always
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span id="always-text" class="text-xs font-semibold inline-block text-green-600"></span>
+                </div>
+              </div>
+              <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-200">
+                <div id="always-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+              </div>
+            </div>
+            <div class="relative pt-1">
+              <div class="flex mb-2 items-center justify-between">
+                <div>
+                  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
+                    Frequently
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span id="frequently-text" class="text-xs font-semibold inline-block text-blue-600">
+                  
+                  </span>
+                </div>
+              </div>
+              <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
+                <div id="frequently-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"></div>
+              </div>
+            </div>
+            <div class="relative pt-1">
+              <div class="flex mb-2 items-center justify-between">
+                <div>
+                  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-yellow-600 bg-yellow-200">
+                    Sometimes
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span id="sometimes-text" class="text-xs font-semibold inline-block text-yellow-600">
+                  
+                  </span>
+                </div>
+              </div>
+              <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-yellow-200">
+                <div id="sometimes-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500"></div>
+              </div>
+            </div>
+            <div class="relative pt-1">
+              <div class="flex mb-2 items-center justify-between">
+                <div>
+                  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-pink-600 bg-pink-200">
+                    Rarely
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span id="rarely-text" class="text-xs font-semibold inline-block text-pink-600">
+                  
+                  </span>
+                </div>
+              </div>
+              <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-pink-200">
+                <div id="rarely-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-pink-500"></div>
+              </div>
+            </div>
+            <div class="relative pt-1">
+              <div class="flex mb-2 items-center justify-between">
+                <div>
+                  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-200">
+                    Never
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span id="never-text" class="text-xs font-semibold inline-block text-red-600">
+                   
+                  </span>
+                </div>
+              </div>
+              <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-red-200">
+                <div id="never-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="text-white text-center text-xs">*Data provided by the New York Times. <a href="https://www.nytimes.com/interactive/2020/07/17/upshot/coronavirus-face-mask-map.html">Check out their article are mask wearing habits.</a> </p>
+        </div>
+      </div>
       <div class="bg-gray-50">
-          <div class="grid grid-cols-2 pt-16 pl-48 pr-48 pb-16">
+          <div class="grid grid-cols-2 pt-16 pl-48 pr-48">
               <h1 class="text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl md:text-4xl text-left">Global COVID-19 Cases</h1>
               <h1 class="text-3xl tracking-tight font-extrabold text-red-600 sm:text-4xl md:text-4xl text-right" id="covidGlobal"></h1>
           </div>
-          <div class="grid grid-cols-2 gap-x-16 gap-y-16 pl-48 pr-48 pb-16" id="covidCountries">
-
-          </div>
+          <div class="grid grid-cols-2 gap-x-16 gap-y-16 pl-48 pr-48 pb-16" id="covidCountries"></div>
+      </div>
+      <div class="mx-48 my-24">
+        <h1 class="text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl md:text-4xl text-left ">Sources</h1>
+        <p class="text-lg py-6">AI trained using <a href="chablemachine.withgoogle.com">Google's Teachable Machine</a></p>
+        <p class="text-lg pb-6">Data provided by the New York Times. <a href="https://www.nytimes.com/interactive/2020/07/17/upshot/coronavirus-face-mask-map.html">Check out their article are mask wearing habits</a> and <a href="https://github.com/nytimes/covid-19-data/tree/master/live">check out their GitHub</a></p>
+        <p class="text-lg pb-6">Reverse Geoencoder by <a href="https://developer.mapquest.com">MapQuest</a></p>
+        <p class="text-lg pb-6">FIPS Code to Zip Code Data Set by <a href="https://github.com/Data4Democracy/zip-code-to-county/blob/master/county-fips.csv">learningsomethingnew</a> on GitHub</p>
+        <p class="text-lg pb-6">COVID-19 Data API by <a href="https://covid19api.com/">COVID-19 API</a></p>
+        <p class="text-lg pb-6">Mask wearing information from the <a href="https://www.cdc.gov/coronavirus/2019-ncov/prevent-getting-sick/diy-cloth-face-coverings.html">CDC</a></p>
       </div>
       <div class="p-4 bg-gray-50 px-16">
           <h4 class="text-gray-900">© 2020 Ethan Hancock</h4>
